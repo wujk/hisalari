@@ -11,9 +11,6 @@
 
     <artifactId>service</artifactId>
     <packaging>pom</packaging>
-    <modules>
-        <module>dao</module>
-    </modules>
 
 
 </project>

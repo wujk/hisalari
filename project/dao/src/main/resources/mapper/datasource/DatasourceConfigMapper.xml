@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hisalari.dao.datasource.DatasourceConfigMapper">
+  <resultMap id="BaseResultMap" type="com.hisalari.model.datasource.DatasourceConfig">
+    <id column="UID" jdbcType="VARCHAR" property="uid" />
+    <result column="URL" jdbcType="VARCHAR" property="url" />
+    <result column="IP" jdbcType="VARCHAR" property="ip" />
+    <result column="PORT" jdbcType="INTEGER" property="port" />
+    <result column="DATASOURCE_NAME" jdbcType="VARCHAR" property="datasourceName" />
+    <result column="USERNAME" jdbcType="VARCHAR" property="username" />
+    <result column="PASSWORD" jdbcType="VARCHAR" property="password" />
+    <result column="ENABLE" jdbcType="BIT" property="enable" />
+    <result column="CREATE_TIME" jdbcType="BIGINT" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    UID, URL, IP, PORT, DATASOURCE_NAME, USERNAME, PASSWORD, ENABLE,CREATE_TIME
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from DATASOURCE_CONFIG
+    where UID = #{uid,jdbcType=VARCHAR} 
+    AND ENABLE = 1
+  </select>
+  
+   <select id="selectDatasourceConfigs" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from DATASOURCE_CONFIG where ENABLE = 1
+  </select>
+  
+  <select id="selectValidSource" parameterType="java.lang.String" resultType="java.lang.String">
+    select 
+    UID
+    from DATASOURCE_CONFIG where ENABLE = 1
+  </select>
+
+  <select id="getCount"  resultType="java.lang.Integer">
+    select
+    count(*)
+    from DATASOURCE_CONFIG where ENABLE = 1
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from DATASOURCE_CONFIG
+    where UID = #{uid,jdbcType=VARCHAR}
+  </delete>
+  
+  <insert id="createDataBase" parameterType="java.lang.String">
+    CREATE DATABASE IF NOT EXISTS #{dataBaseName,jdbcType=VARCHAR} DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+  </insert>
+
+  <insert id="insert" parameterType="com.hisalari.model.datasource.DatasourceConfig">
+    insert into DATASOURCE_CONFIG (UID, URL, IP, 
+      PORT, DATASOURCE_NAME, USERNAME, 
+      PASSWORD,ENABLE, CREATE_TIME)
+    values (#{uid,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, 
+      #{port,jdbcType=INTEGER}, #{datasourceName,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, 
+      #{password,jdbcType=VARCHAR},#{enable,jdbcType=BIT}, #{createTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hisalari.model.datasource.DatasourceConfig">
+    insert into DATASOURCE_CONFIG
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="uid != null">
+        UID,
+      </if>
+      <if test="url != null">
+        URL,
+      </if>
+      <if test="ip != null">
+        IP,
+      </if>
+      <if test="port != null">
+        PORT,
+      </if>
+      <if test="datasourceName != null">
+        DATASOURCE_NAME,
+      </if>
+      <if test="username != null">
+        USERNAME,
+      </if>
+      <if test="password != null">
+        PASSWORD,
+      </if>
+      <if test="enable != null">
+        ENABLE,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="uid != null">
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null">
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="port != null">
+        #{port,jdbcType=INTEGER},
+      </if>
+      <if test="datasourceName != null">
+        #{datasourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="enable != null">
+        #{enable,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hisalari.model.datasource.DatasourceConfig">
+    update DATASOURCE_CONFIG
+    <set>
+      <if test="url != null">
+        URL = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null">
+        IP = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="port != null">
+        PORT = #{port,jdbcType=INTEGER},
+      </if>
+      <if test="datasourceName != null">
+        DATASOURCE_NAME = #{datasourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        USERNAME = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        PASSWORD = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=BIGINT},
+      </if>
+       <if test="enable != null">
+        ENABLE = #{enable,jdbcType=BIT},
+      </if>
+    </set>
+    where UID = #{uid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hisalari.model.datasource.DatasourceConfig">
+    update DATASOURCE_CONFIG
+    set URL = #{url,jdbcType=VARCHAR},
+      IP = #{ip,jdbcType=VARCHAR},
+      PORT = #{port,jdbcType=INTEGER},
+      DATASOURCE_NAME = #{datasourceName,jdbcType=VARCHAR},
+      USERNAME = #{username,jdbcType=VARCHAR},
+      PASSWORD = #{password,jdbcType=VARCHAR},
+      ENABLE = #{enable,jdbcType=BIT},
+      CREATE_TIME = #{createTime,jdbcType=BIGINT}
+    where UID = #{uid,jdbcType=VARCHAR}
+  </update>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+     insert into DATASOURCE_CONFIG (UID, URL, IP, 
+      PORT, DATASOURCE_NAME, USERNAME, 
+      PASSWORD,ENABLE, CREATE_TIME)
+	    values 
+	     <foreach collection="list" item="item" index="index" open=""
+			close="" separator=",">
+	 (#{item.uid,jdbcType=VARCHAR}, 
+	  #{item.url,jdbcType=VARCHAR}, 
+	  #{item.ip,jdbcType=VARCHAR}, 
+      #{item.port,jdbcType=INTEGER}, 
+      #{item.datasourceName,jdbcType=VARCHAR}, 
+      #{item.username,jdbcType=VARCHAR}, 
+      #{item.password,jdbcType=VARCHAR},
+      #{item.enable,jdbcType=BIT}, 
+      #{item.createTime,jdbcType=BIGINT})
+	   </foreach>
+ 	</insert>
+
+</mapper>

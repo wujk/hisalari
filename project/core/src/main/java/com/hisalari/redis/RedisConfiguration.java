@@ -3,7 +3,10 @@ package com.hisalari.redis;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hisalari.properties.PropertiesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -27,6 +30,7 @@ import java.util.HashSet;
  *
  */
 @Configuration
+@AutoConfigureAfter(PropertiesConfiguration.class)
 public class RedisConfiguration {
 	
 	// 普通操作类
@@ -37,15 +41,30 @@ public class RedisConfiguration {
 	
 	private JedisClientConfiguration jedisClientConfiguration;   // 构建线程池
 	private JedisPoolConfig jedisPoolConfig;   // 线程池信息
-	
-	private int maxIdle = 10;
-	private long maxWaitMillis = 10000000;
-	private boolean testOnBorrow = true;
-	private String hostName = "192.168.140.159";
-	private int port = 6379;
-	private int index = 0;
-	private int maxTotal = 5;
-	private String password = "pass";
+
+	@Value("${redis.maxIdle}")
+	private int maxIdle;
+
+	@Value("${redis.maxWait}")
+	private long maxWaitMillis;
+
+	@Value("${redis.testOnBorrow}")
+	private boolean testOnBorrow;
+
+	@Value("${redis.host}")
+	private String hostName;
+
+	@Value("${redis.port}")
+	private int port;
+
+	@Value("${redis.db}")
+	private int index;
+
+	@Value("${reids.maxTotal}")
+	private int maxTotal;
+
+	@Value("${redis.pass}")
+	private String password;
 
 	@Bean("redisTemplate")
 	public RedisTemplate<String, Object> redisTemplate(@Autowired JedisConnectionFactory jedisConnectionFactory) {

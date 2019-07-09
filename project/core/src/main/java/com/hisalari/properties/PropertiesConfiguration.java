@@ -1,5 +1,6 @@
 package com.hisalari.properties;
 
+import org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +12,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 @Configuration
 public class PropertiesConfiguration {
 
-    private PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     private List<Resource> common() {
@@ -27,32 +28,69 @@ public class PropertiesConfiguration {
         return resources;
     }
 
+    /**
+     * 该类型激活可用@Value("${redis.maxIdle}")配置
+     * @return
+     * @throws Exception
+     */
     @Bean
     @Profile("dev")
-    public void dev() throws Exception {
-        getProperties("classpath*:*_dev.properties");
+    public PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurerDev() throws Exception {
+        PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurer = new PreferencesPlaceholderConfigurer();
+        preferencesPlaceholderConfigurer.setProperties(dev());
+        return preferencesPlaceholderConfigurer;
     }
 
     @Bean
     @Profile("sit")
-    public void sit() throws Exception {
-        getProperties("classpath*:*_sit.properties");
+    public PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurerSit() throws Exception {
+        PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurer = new PreferencesPlaceholderConfigurer();
+        preferencesPlaceholderConfigurer.setProperties(sit());
+        return preferencesPlaceholderConfigurer;
     }
 
     @Bean
     @Profile("prod")
-    public void prod() throws Exception {
-        getProperties("classpath*:*_prod.properties");
+    public PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurerProd() throws Exception {
+        PreferencesPlaceholderConfigurer preferencesPlaceholderConfigurer = new PreferencesPlaceholderConfigurer();
+        preferencesPlaceholderConfigurer.setProperties(prod());
+        return preferencesPlaceholderConfigurer;
     }
 
-    private void getProperties(String location) throws Exception {
+    /**
+     * 该类型配置激活可用@Value("#{prop['redis.host']}")来注释
+     * @return
+     * @throws Exception
+     */
+    @Bean("prop")
+    @Profile("dev")
+    public Properties dev() throws Exception {
+        return getProperties("classpath*:*_dev.properties");
+    }
+
+    @Bean("prop")
+    @Profile("sit")
+    public Properties sit() throws Exception {
+        return getProperties("classpath*:*_sit.properties");
+    }
+
+    @Bean("prop")
+    @Profile("prod")
+    public Properties prod() throws Exception {
+        return getProperties("classpath*:*_prod.properties");
+    }
+
+    private Properties getProperties(String location) throws Exception {
+        PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
         List<Resource> list = common();
         Resource[] _resources = resourcePatternResolver.getResources(location);
         list.addAll(Arrays.asList(_resources));
         Resource[] resources = new Resource[list.size()];
         resources = list.toArray(resources);
         propertiesFactoryBean.setLocations(resources);
-        propertiesFactoryBean.getObject();
+        propertiesFactoryBean.afterPropertiesSet();
+        Properties properties = propertiesFactoryBean.getObject();
+        return properties;
     }
 
 }
