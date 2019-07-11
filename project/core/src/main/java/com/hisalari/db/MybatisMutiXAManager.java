@@ -25,7 +25,7 @@ import java.util.UUID;
  * mybatais多数据源
  */
 @Component
-public class MybatisMutiXAManager<M> extends MybatisMutiManager<M> {
+public class MybatisMutiXAManager extends MybatisMutiManager {
     private Logger logger = LoggerFactory.getLogger(DataBaseManager.class);
 
     @Resource(name = "atomikosJta")
@@ -33,13 +33,13 @@ public class MybatisMutiXAManager<M> extends MybatisMutiManager<M> {
 
     @Override
     public List<DataBase> findDatabase() {
-        SqlSession session = null;
-        List<DataBase> dataBases = new ArrayList<>();
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
         TransactionStatus ts = platformTransactionManager.getTransaction(def);
-        try  {
-            session = sqlSessionFactory.openSession();
-            DatasourceConfigMapper datasourceConfigMapper = session.getMapper(DatasourceConfigMapper.class);
+        List<DataBase> dataBases = new ArrayList<>();
+        SqlSession session = null;
+        try{
+            DatasourceConfigMapper datasourceConfigMapper = getMapper(DatasourceConfigMapper.class, MybatisMutiXAManager.BASE_DB_ID);
             List<DatasourceConfig> datasourceConfigs = datasourceConfigMapper.selectDatasourceConfigs();
             for (DatasourceConfig datasourceConfig: datasourceConfigs) {
                 DataBase dataBase = new DataBase();
@@ -49,16 +49,16 @@ public class MybatisMutiXAManager<M> extends MybatisMutiManager<M> {
                 dataBase.setPassword(datasourceConfig.getPassword());
                 dataBases.add(dataBase);
             }
+            session = getCurrentSqlSession(MybatisMutiXAManager.BASE_DB_ID);
             platformTransactionManager.commit(ts);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             platformTransactionManager.rollback(ts);
         } finally {
-            if (session != null) {
-                session.close();
-            }
-            return dataBases;
+           session.close();
+           return dataBases;
         }
+
     }
 
     @Override

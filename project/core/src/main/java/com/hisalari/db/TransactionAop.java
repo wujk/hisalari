@@ -24,7 +24,7 @@ public class TransactionAop {
     private DataSourceTransactionManager dataSourceTransactionManager;
 
     @Resource(name = "springContextUtils")
-    private SpringContextUtils<JtaTransactionManager> springContextUtils;
+    private SpringContextUtils springContextUtils;
 
     @Pointcut("@annotation(com.hisalari.db.DataSourceEnable)")
     private void transactional() {

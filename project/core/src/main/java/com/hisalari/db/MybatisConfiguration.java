@@ -15,9 +15,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import java.sql.SQLException;
 import java.util.UUID;
@@ -28,7 +30,7 @@ public class MybatisConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    @Bean("druidXADataSource")
+    @Bean(value = "druidXADataSource", destroyMethod = "close", initMethod = "init")
     public DruidXADataSource dataSource() throws SQLException{
         DruidXADataSource druidXADataSource = new DruidXADataSource();
         druidXADataSource.setUrl(url);
@@ -57,7 +59,8 @@ public class MybatisConfiguration implements ApplicationContextAware {
         return druidXADataSource;
     }
 
-    @Bean("atomikosDataSourceBean")
+    @Bean(value = "atomikosDataSourceBean", destroyMethod = "close", initMethod = "init")
+    @DependsOn({"atomikosJta"})
     public AtomikosDataSourceBean atomikosDataSourceBean(@Autowired @Qualifier("druidXADataSource") DruidXADataSource druidXADataSource) throws SQLException {
         AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
         atomikosDataSourceBean.setXaDataSource(druidXADataSource);

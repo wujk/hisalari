@@ -1,0 +1,1562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hisalari.dao.company.DeptMapper">
+
+	<resultMap id="BaseResultMap" type="com.hisalari.model.comapny.Dept">
+		<id column="UID" jdbcType="VARCHAR" property="uid" />
+		<result column="COMPANY_UID" jdbcType="VARCHAR" property="companyUid" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="DEPT_CODE" jdbcType="VARCHAR" property="deptCode" />
+		<result column="PARENT_ID" jdbcType="VARCHAR" property="parentId" />
+		<result column="LEVEL" jdbcType="INTEGER" property="level" />
+		<result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+		<result column="IS_DELETE" jdbcType="INTEGER" property="isDelete" />
+		<result column="SORT" jdbcType="INTEGER" property="sort" />
+		<result column="STAFFRECORD_UID" jdbcType="VARCHAR" property="staffRecordUid" />
+		<result column="FULL_NAME" jdbcType="VARCHAR" property="fullName" />
+		<result column="TREE_PATH" jdbcType="VARCHAR" property="treePath" />
+		<result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+		<result column="CREATE_TIME" jdbcType="BIGINT" property="createTime" />
+		<result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+		<result column="UPDATE_TIME" jdbcType="BIGINT" property="updateTime" />
+	</resultMap>
+	<resultMap id="DeptResultMap" type="com.hisalari.model.comapny.Dept">
+		<id column="UID" jdbcType="VARCHAR" property="uid" />
+		<result column="COMPANY_UID" jdbcType="VARCHAR" property="companyUid" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+        <result column="DEPT_CODE" jdbcType="VARCHAR" property="deptCode" />
+		<result column="PARENT_ID" jdbcType="VARCHAR" property="parentId" />
+		<result column="LEVEL" jdbcType="INTEGER" property="level" />
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+        <result column="SORT" jdbcType="INTEGER" property="sort" />
+		<result column="STAFFRECORD_UID" jdbcType="VARCHAR" property="staffRecordUid" />
+		<result column="FULL_NAME" jdbcType="VARCHAR" property="fullName" />
+		<result column="TREE_PATH" jdbcType="VARCHAR" property="treePath" />
+		<result column="JOB_NUMBER" jdbcType="VARCHAR" property="jobNumber" />
+		<result column="STAFF_NAME" jdbcType="VARCHAR" property="staffName" />
+	</resultMap>
+	<resultMap id="CompanyDeptResultMap" type="com.hisalari.model.comapny.Dept">
+		<id column="UID" jdbcType="VARCHAR" property="uid" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="COMPANY_UID" jdbcType="VARCHAR" property="companyUid" />
+		<result column="PARENT_ID" jdbcType="VARCHAR" property="parentId" />
+		<result column="DEPT_CODE" jdbcType="VARCHAR" property="deptCode" />
+		<result column="SORT" jdbcType="INTEGER" property="sort" />
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+        <result column="STAFFRECORD_UID" jdbcType="VARCHAR" property="staffRecordUid" />
+		<result column="JOB_NUMBER" jdbcType="VARCHAR" property="jobNumber" />
+		<result column="STAFF_NAME" jdbcType="VARCHAR" property="staffName" />
+		<result column="FULL_NAME" jdbcType="VARCHAR" property="fullName" />
+		<result column="TREE_PATH" jdbcType="VARCHAR" property="treePath" />
+		<result column="LEVEL" jdbcType="INTEGER" property="level" />
+	</resultMap>
+
+	<resultMap id="CompanyDepetTreeResult" type="com.hisalari.model.comapny.Dept"
+		extends="CompanyDeptResultMap">
+		<collection property="children" javaType="java.util.ArrayList"
+			column="uid" ofType="com.hisalari.model.comapny.Dept" select="selectChildDept"></collection>
+	</resultMap>
+
+	<resultMap id="selectChildDeptResult" type="com.hisalari.model.comapny.Dept"
+		extends="DeptResultMap">
+		<collection property="children" javaType="java.util.ArrayList"
+			column="uid" ofType="com.hisalari.model.comapny.Dept" select="selectChildDept"></collection>
+	</resultMap>
+
+	<resultMap id="CompanyDepetStaffTreeResult" type="com.hisalari.model.comapny.Dept"
+		extends="CompanyDeptResultMap">
+		<collection property="children" javaType="java.util.ArrayList"
+			column="uid" ofType="com.hisalari.model.comapny.Dept" select="selectChildDeptStaff"></collection>
+	</resultMap>
+
+	<resultMap id="selectChildDeptStaffResult" type="com.hisalari.model.comapny.Dept"
+		extends="DeptResultMap">
+		<collection property="children" javaType="java.util.ArrayList"
+			column="uid" ofType="com.hisalari.model.comapny.Dept" select="selectChildDeptStaff"></collection>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		UID, COMPANY_UID, NAME, DEPT_CODE, PARENT_ID, LEVEL,SORT,
+		IS_DELETE,STAFFRECORD_UID, FULL_NAME, TREE_PATH,DESCRIPTION,
+		CREATE_USER,
+		CREATE_TIME,
+		UPDATE_USER, UPDATE_TIME
+	</sql>
+	<sql id="seletDept_Cloumn">
+		a.UID, a.COMPANY_UID, a.NAME, a.DEPT_CODE, a.PARENT_ID,
+		a.LEVEL,
+		a.IS_DELETE, a.SORT, a.STAFFRECORD_UID
+	</sql>
+
+	<select id="staffCount" parameterType="com.hisalari.model.criteria.DeptCriteria"
+		resultType="int">
+        SELECT
+			count( 1 ) 
+		FROM
+			STAFF_COMMON a
+			LEFT JOIN b STAFF_MAIN b.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+			LEFT JOIN DEPT c ON c.UID = a.DEPT_UID 
+			AND b.`STATUS` = 1
+		<where>
+			<if test="list !=null and list.size() > 0">
+				c.UID in
+				<foreach item="deptid" index="index" collection="list" open="("
+					separator="," close=")">
+					#{deptid}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="selectDeptStaffCount" parameterType="com.hisalari.model.criteria.DeptCriteria"
+		resultType="int">
+        SELECT
+			count( 1 ) 
+		FROM
+			STAFF_COMMON a
+			LEFT JOIN STAFF_MAIN b ON a.STAFF_RECORD_UID = b.STAFF_RECORD_UID
+			LEFT JOIN DEPT c ON c.UID = a.DEPT_UID 
+		WHERE
+			a.STAFF_STATUS IN ( 0, 1, 3, 4, 5 ) 
+			AND b.`STATUS` = 1 
+			AND b.IS_LEAVE = FALSE
+		<if test="list!=null and list.size()>0">
+			and a.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+		<if test="cities!=null and cities.size()>0">
+			and a.CITY in
+			<foreach item="cityId" index="index" collection="cities"
+				open="(" separator="," close=")">
+				#{cityId}
+			</foreach>
+		</if>
+		<if test="staffStatus!=null and staffStatus.size()>0">
+			and a.STAFF_STATUS in
+			<foreach item="staffStatu" index="index" collection="staffStatus"
+				open="(" separator="," close=")">
+				#{staffStatu}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="selectDeptStaff" parameterType="com.hisalari.model.criteria.DeptCriteria"
+		resultType="map">
+        SELECT DISTINCT
+        a.ID_NUMBER AS idcard,
+        a.STAFF_RECORD_UID AS recordUid,
+        a.NAME as name,
+        a.MOBILE AS phone,
+        a.GENDER AS sex,
+        b.`NAME` AS deptName,
+        a.POSITION AS position,
+        c.STATUS as status,
+        d.TYPE AS rcode,
+        a.AGE AS age,
+        a.JOB_NUMBER AS jobNumber,
+        a.DEPT_UID AS deptUid
+        FROM
+        STAFF_COMMON a
+        LEFT JOIN DEPT b ON b.UID = a.DEPT_UID
+        LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+        LEFT JOIN ROLE_ACCOUNT_REF d ON ( d.COMPANY_UID = #{companyUid}  AND d.RECORD_UID = a.STAFF_RECORD_UID )
+        WHERE
+        c.`STATUS` = 1
+        AND a.STAFF_STATUS IN (0, 1, 3, 4, 5)
+        AND c.IS_LEAVE = FALSE
+
+		<if test="list!=null and list.size()>0">
+			and a.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+		<if test="cities!=null and cities.size()>0">
+			and a.CITY in
+			<foreach item="cityId" index="index" collection="cities"
+				open="(" separator="," close=")">
+				#{cityId}
+			</foreach>
+		</if>
+		<if test="staffStatus!=null and staffStatus.size()>0">
+			and a.STAFF_STATUS in
+			<foreach item="staffStatu" index="index" collection="staffStatus"
+				open="(" separator="," close=")">
+				#{staffStatu}
+			</foreach>
+		</if>
+		order by a.CREATE_TIME desc
+		<if test="first != null and size != null">
+			limit #{first} ,#{size}
+		</if>
+	</select>
+
+
+	<select id="selectDeptStaffs" parameterType="com.hisalari.model.criteria.DeptCriteria"
+		resultType="map">
+        SELECT DISTINCT
+        a.ID_NUMBER AS idcard,
+        a.STAFF_RECORD_UID AS recordUid,
+        a.NAME as name,
+        a.MOBILE AS phone,
+        a.GENDER AS sex,
+        b.`NAME` AS deptName,
+        a.POSITION AS position,
+        c.STATUS as status,
+        d.TYPE AS rcode,
+        a.AGE AS age,
+        a.JOB_NUMBER AS jobNumber,
+        a.DEPT_UID AS deptUid
+        FROM
+        STAFF_COMMON a
+        LEFT JOIN DEPT b ON b.UID = a.DEPT_UID
+		LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+		LEFT JOIN ROLE_ACCOUNT_REF d ON ( d.COMPANY_UID = #{companyUid} AND d.RECORD_UID = a.STAFF_RECORD_UID ) 
+        WHERE
+        c.`STATUS` = 1
+        AND a.STAFF_STATUS IN (-1,0, 1, 3, 4, 5)
+        AND c.IS_LEAVE = FALSE
+
+		<if test="list!=null and list.size()>0">
+			and a.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+		<if test="cities!=null and cities.size()>0">
+			and a.CITY in
+			<foreach item="cityId" index="index" collection="cities"
+				open="(" separator="," close=")">
+				#{cityId}
+			</foreach>
+		</if>
+		<if test="staffStatus!=null and staffStatus.size()>0">
+			and a.STAFF_STATUS in
+			<foreach item="staffStatu" index="index" collection="staffStatus"
+				open="(" separator="," close=")">
+				#{staffStatu}
+			</foreach>
+		</if>
+		order by a.CREATE_TIME desc
+		<if test="first != null and size != null">
+			limit #{first} ,#{size}
+		</if>
+	</select>
+
+
+	<select id="selectDeptTransferStaffs" parameterType="com.hisalari.model.criteria.DeptCriteria"
+		resultType="map">
+        SELECT DISTINCT
+        a.UID,a.RECORD_UID
+        FROM
+        TRANSFER_POSITION a
+        LEFT JOIN DEPT b ON b.UID = a.ADJUST_DEPT_UID
+		where a.status = '0'
+		<if test="list!=null and list.size()>0">
+			and a.ADJUST_DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="queryTaskStaff" parameterType="com.hisalari.model.criteria.StaffCriteria"
+		resultType="map">
+       SELECT
+        c.NAME AS name,
+        c.JOB_NUMBER AS jobNumber,
+        f.NAME AS deptName,
+        c.STAFF_RECORD_UID AS recordUid
+        FROM
+        PROJECT_MANAGE a
+		LEFT JOIN  RECORD_PROJECT_REF b ON  a.UID = b.PROJECT_UID
+        LEFT JOIN  STAFF_COMMON c ON b.RECORD_UID = c.STAFF_RECORD_UID
+		LEFT JOIN STAFF_MAIN d ON d.STAFF_RECORD_UID = c.STAFF_RECORD_UID
+        LEFT JOIN DEPT f on c.DEPT_UID = f.UID
+        WHERE
+         c.STAFF_STATUS IN (0, 1, 3, 4, 5)
+        AND d.IS_LEAVE = FALSE
+		<if test="projectUid != null">
+			and a.UID = #{projectUid,jdbcType=VARCHAR}
+		</if>
+		<if test="recordUid != null">
+			and c.STAFF_RECORD_UID != #{recordUid,jdbcType=VARCHAR}
+		</if>
+		<if test="deptUids != null and deptUids.size()>0">
+			and c.DEPT_UID in <foreach collection="deptUids" item="deptUid" index="index" 
+			open="(" separator="," close=")">#{deptUid}</foreach>
+		</if>
+		<if test="key != null">
+			and (c.`NAME` like '%${key}%' or c.JOB_NUMBER like '%${key}%')
+		</if>
+		<if test="podoProvinces != null and podoProvinces.size()>0">
+			and c.PROVINCE in <foreach collection="podoProvinces" item="podoProvince" index="index"
+			open="(" separator="," close=")">#{podoProvince}</foreach>
+		</if>
+		<if test="companyUid != null">
+			and c.COMPANY_UID = #{companyUid}
+		</if>
+		<if test="name != null">
+			and c.NAME = #{name}
+		</if>
+		<if test="mobile != null">
+			and c.MOBILE = #{mobile}
+		</if>
+		<if test="jobNumber != null">
+			and c.JOB_NUMBER = #{jobNumber}
+		</if>
+		<if test="staffRecordId != null and staffRecordId.size()>0">
+		and b.RECORD_UID not in <foreach collection="staffRecordId" item="staffRecordId" index="index" 
+		open="(" separator="," close=")">#{staffRecordId}</foreach>
+		</if>
+		order by a.CREATE_TIME desc
+		<if test="first != null and size != null">
+			limit #{first} ,#{size}
+		</if>
+	</select>
+
+	<select id="countTaskStaff" parameterType="com.hisalari.model.criteria.StaffCriteria"
+		resultType="int">
+        SELECT
+       		 count(1)
+        FROM
+        PROJECT_MANAGE a 
+		LEFT JOIN RECORD_PROJECT_REF b ON a.UID = b.PROJECT_UID
+		LEFT JOIN STAFF_COMMON c ON  b.RECORD_UID = c.STAFF_RECORD_UID
+		LEFT JOIN STAFF_MAIN d ON  c.STAFF_RECORD_UID = d.STAFF_RECORD_UID
+        LEFT JOIN DEPT f ON c.DEPT_UID = f.UID
+        WHERE
+         c.STAFF_STATUS IN (0, 1, 3, 4, 5)
+        AND d.IS_LEAVE = FALSE
+		<if test="projectUid != null">
+			and a.UID = #{projectUid,jdbcType=VARCHAR}
+		</if>
+		<if test="deptUids != null and deptUids.size()>0">
+			and c.DEPT_UID in <foreach collection="deptUids" item="deptUid" index="index" 
+			open="(" separator="," close=")">#{deptUid}</foreach>
+		</if>
+		<if test="staffRecordId != null and staffRecordId.size()>0 ">
+		and b.RECORD_UID not in <foreach collection="staffRecordId" item="staffRecordId" index="index" 
+		open="(" separator="," close=")">#{staffRecordId}</foreach>
+		</if>
+		<if test="key != null">
+			and (c.`NAME` like '%${key}%' or c.JOB_NUMBER like '%${key}%')
+		</if>
+		<if test="podoProvinces != null and podoProvinces.size()>0">
+			and c.PROVINCE in <foreach collection="podoProvinces" item="podoProvince" index="index"
+			open="(" separator="," close=")">#{podoProvince}</foreach>
+		</if>
+		<if test="companyUid != null">
+			and c.COMPANY_UID = #{companyUid}
+		</if>
+		<if test="name != null">
+			and c.NAME = #{name}
+		</if>
+		<if test="mobile != null">
+			and c.MOBILE = #{mobile}
+		</if>
+		<if test="jobNumber != null">
+			and c.JOB_NUMBER = #{jobNumber}
+		</if>
+	 	<if test="recordUid != null">
+			and c.STAFF_RECORD_UID != #{recordUid,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<select id="queryCompanyDept" parameterType="java.lang.String"
+		resultMap="CompanyDepetTreeResult">
+		 SELECT
+            a.UID,
+            a.NAME,
+            a.DEPT_CODE,
+            a.COMPANY_UID,
+            a.STAFFRECORD_UID,
+            a.FULL_NAME,
+            a.TREE_PATH,
+            a.DESCRIPTION,
+            a.LEVEL,
+            a.sort,
+            b.JOB_NUMBER,
+            b.NAME AS STAFF_NAME
+        FROM
+            DEPT a
+         LEFT JOIN STAFF_COMMON b ON a.STAFFRECORD_UID = b.STAFF_RECORD_UID
+        WHERE
+            a.COMPANY_UID = #{companyUid,jdbcType=VARCHAR}
+        AND a.IS_DELETE = 0
+        AND a.parent_id = '0'
+	</select>
+
+	<select id="queryAllDept" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		WHERE IS_DELETE =FALSE and COMPANY_UID = #{companyUid}
+	</select>
+	<select id="selectChildDept" parameterType="java.lang.String"
+		resultMap="selectChildDeptResult">
+        SELECT
+        a.UID,
+        a.COMPANY_UID,
+        a. NAME,
+        a.DEPT_CODE,
+        a.PARENT_ID,
+         a.DESCRIPTION,
+        a. LEVEL,
+        a.IS_DELETE,
+        a.SORT,
+        a.STAFFRECORD_UID,
+        b.JOB_NUMBER,
+        b. NAME AS STAFF_NAME
+        FROM
+        DEPT a
+        LEFT JOIN STAFF_COMMON b ON a.STAFFRECORD_UID = b.STAFF_RECORD_UID
+        WHERE
+        a.parent_id = #{uid,jdbcType=VARCHAR}
+        AND a.IS_DELETE = 0
+        ORDER BY
+        a.UID
+	</select>
+	<select id="findChildDept" parameterType="java.lang.String"
+		resultMap="selectChildDeptResult">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		WHERE UID = #{uid,jdbcType=VARCHAR} and IS_DELETE = 0
+	</select>
+	<select id="queryDeptParentIdByDeptUid" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select
+		UID
+		IS_DELETE
+		from DEPT
+		WHERE parent_id =
+		#{uid,jdbcType=VARCHAR} and
+		IS_DELETE = 0
+	</select>
+
+	<select id="queryCompanyDeptStaff" parameterType="java.lang.String"
+		resultMap="CompanyDepetStaffTreeResult">
+		SELECT
+		b.UID ,
+		b.NAME
+		FROM
+		COMPANY a
+		LEFT JOIN DEPT b ON (a.UID =
+		b.COMPANY_UID AND b.IS_DELETE = 0 AND b.parent_id = '0')
+		WHERE a.uid =
+		#{companyUid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectChildDeptStaff" parameterType="java.lang.String"
+		resultMap="selectChildDeptStaffResult">
+		select
+		b.UID,
+		b.NAME,
+		b.PARENT_ID,
+		c.STAFF_RECORD_UID AS recordUid,
+		c.NAME AS staffName,
+		c.STAFF_UID as staffUid
+		FROM
+		DEPT b
+		LEFT JOIN STAFF_COMMON c ON
+        c.DEPT_UID = b.UID
+		WHERE
+		b.parent_id = #{uid,jdbcType=VARCHAR} and b.IS_DELETE = 0
+	</select>
+
+	<select id="selectByPrimaryKey" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		where UID = #{uid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryDeptParentId" parameterType="java.lang.String"
+		resultMap="DeptResultMap">
+		select
+		UID, COMPANY_UID, NAME, DEPT_CODE, PARENT_ID,
+		IS_DELETE
+		from DEPT
+		WHERE parent_id = #{uid,jdbcType=VARCHAR} and
+		IS_DELETE = 0
+	</select>
+	<!-- 根据当前模块id 查询部门 queryDeptFunUid -->
+	<select id="queryDeptFunUid" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select a.DEPT_UID as UID, b.`NAME` as NAME,a.IS_CONFIG ,
+		b.PARENT_ID
+		from FUN_DEPT_REF a
+		LEFT JOIN DEPT b ON b.UID = a.DEPT_UID
+		where
+		a.ACCOUNT_UID = #{0,jdbcType=VARCHAR} and
+		a.FUN_UID IN (SELECT UID
+		from
+		hr_saas.FUNC_MODULE WHERE FUN_CODE = #{1,jdbcType=VARCHAR}) and
+		a.IS_CONFIG = true and
+		b.COMPANY_UID = #{2,jdbcType=VARCHAR}
+		and b.parent_id != '0'
+	</select>
+	<select id="deptCount" parameterType="java.lang.String"
+		resultType="int">
+		SELECT COUNT(1) FROM DEPT where COMPANY_UID =
+		#{companyUid,jdbcType=VARCHAR}
+		and IS_DELETE = 0
+	</select>
+	<select id="selectEntryStaffCount" parameterType="java.util.ArrayList"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		STAFF_COMMON a
+		LEFT JOIN STAFF_MAIN b ON a.STAFF_RECORD_UID = b.STAFF_RECORD_UID
+		WHERE
+		b.`STATUS` = 1 and b.IS_LEAVE = FALSE
+		and a.DATE_OF_ENTRY &lt;= NOW()
+		AND
+		DATE_FORMAT(a.DATE_OF_ENTRY / 1000, '%Y-%m') =
+		DATE_FORMAT(NOW(),'%Y-%m')
+		<if test="list!=null and list.size()>0">
+			and a.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+	</select>
+	<select id="selectLeveStaffCount" parameterType="java.util.ArrayList"
+		resultType="int">
+       	SELECT
+        COUNT(1)
+        FROM
+        LEAVE_OFFICE a
+        LEFT JOIN STAFF_COMMON b ON a.RECORD_UID = b.STAFF_RECORD_UID
+				LEFT JOIN STAFF_MAIN c ON b.STAFF_RECORD_UID = c.STAFF_RECORD_UID
+        WHERE
+        c.IS_LEAVE = TRUE
+        AND 
+        b.DATE_OF_ENTRY &lt;= NOW()
+        AND FROM_UNIXTIME(a.LEVEL_TIME / 1000, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+		<if test="list!=null and list.size()>0">
+			and b.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+	</select>
+	<select id="selectTotalStaffCount" parameterType="java.util.ArrayList"
+		resultType="int">
+		SELECT
+			COUNT(1)
+		FROM
+		STAFF_COMMON a
+		LEFT JOIN STAFF_MAIN b ON b.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+		WHERE
+		b.IS_LEAVE = FALSE
+		and b.`STATUS`= 1
+		<if test="list!=null and list.size()>0">
+			and a.DEPT_UID in
+			<foreach item="deptid" index="index" collection="list" open="("
+				separator="," close=")">
+				#{deptid}
+			</foreach>
+		</if>
+	</select>
+	<select id="selectPrincipal" parameterType="java.lang.String"
+		resultType="map">
+		SELECT
+		b.NAME as name
+		FROM
+		DEPT a
+		LEFT JOIN STAFF_COMMON b ON a.STAFFRECORD_UID = b.STAFF_RECORD_UID
+		WHERE
+		a.UID = #{deptUid,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByCompanyUidAndKey" parameterType="java.lang.String"
+		resultType="map">
+        SELECT
+			a.STAFF_UID AS uid,
+			a.STAFF_RECORD_UID AS recordUid,
+			a.NAME AS NAME,
+			a.JOB_NUMBER AS jobNumber,
+			b.NAME AS deptName 
+		FROM
+			STAFF_COMMON a 
+			LEFT JOIN DEPT b ON a.DEPT_UID = b.UID 
+		  LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+		WHERE
+		 c.STATUS = 1 
+		AND c.IS_LEAVE = FALSE 
+		AND a.STAFF_STATUS IN ( 0, 1, 3, 4, 5 )
+		and a.COMPANY_UID =
+		#{companyUid,jdbcType=VARCHAR}
+		<if test="key != null or key !='' ">
+			and (a.`NAME` like '%${key}%' or a.JOB_NUMBER like
+			'%${key}%' or a.MOBILE like '%${key}%')
+		</if>
+		order by a.CREATE_TIME desc
+	</select>
+
+	<select id="selectByCompanyUidAndDeptUid" parameterType="java.lang.String"
+		resultType="map">
+       SELECT
+			a.STAFF_UID AS uid,
+			b.STAFFRECORD_UID AS recordUid,
+			a.NAME AS NAME,
+			a.JOB_NUMBER AS jobNumber,
+			b.NAME AS deptName 
+		FROM
+			STAFF_COMMON a 
+			LEFT JOIN DEPT b ON a.DEPT_UID = b.UID 
+		  LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+		WHERE
+			 c.STATUS = 1 
+			AND c.IS_LEAVE = FALSE
+		and a.COMPANY_UID = #{companyUid,jdbcType=VARCHAR}
+		<if test="deptUid != null or deptUid !='' ">
+			and a.DEPT_UID = #{deptUid,jdbcType=VARCHAR}
+		</if>
+		order by a.CREATE_TIME desc
+	</select>
+
+	<select id="selectUidByStaffRecourdUid" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		where UID = #{uid,jdbcType=VARCHAR} and STAFFRECORD_UID =
+		#{staffRecordUid,jdbcType=VARCHAR};
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from DEPT
+		where UID = #{uid,jdbcType=VARCHAR}
+	</delete>
+	<!-- delete from DEPT -->
+	<delete id="deleteByUid" parameterType="java.util.ArrayList">
+		update DEPT
+		set IS_DELETE = 1
+		<where>
+			<if test="list!=null and list.size()>0">
+				UID in
+				<foreach item="deptid" index="index" collection="list" open="("
+					separator="," close=")">
+					#{deptid}
+				</foreach>
+			</if>
+		</where>
+	</delete>
+	<insert id="insert" parameterType="com.hisalari.model.comapny.Dept">
+		insert into DEPT (UID,
+		COMPANY_UID, NAME,
+		DEPT_CODE, PARENT_ID, LEVEL,
+		SORT, IS_DELETE,
+		STAFFRECORD_UID,
+		FULL_NAME, TREE_PATH, CREATE_USER,
+		CREATE_TIME,
+		UPDATE_USER, UPDATE_TIME
+		)
+		values (#{uid,jdbcType=VARCHAR},
+		#{companyUid,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{deptCode,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR},
+		#{level,jdbcType=INTEGER},
+		#{sort,jdbcType=INTEGER},
+		#{isDelete,jdbcType=INTEGER},
+		#{staffRecordUid,jdbcType=VARCHAR},
+		#{fullName,jdbcType=VARCHAR}, #{treePath,jdbcType=VARCHAR},
+		#{createUser,jdbcType=VARCHAR},
+		#{createTime,jdbcType=BIGINT},
+		#{updateUser,jdbcType=VARCHAR},
+		#{updateTime,jdbcType=BIGINT}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.hisalari.model.comapny.Dept">
+		insert into DEPT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="uid != null">
+				UID,
+			</if>
+			<if test="companyUid != null">
+				COMPANY_UID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="deptCode != null">
+				DEPT_CODE,
+			</if>
+			<if test="parentId != null">
+				PARENT_ID,
+			</if>
+			<if test="level != null">
+				LEVEL,
+			</if>
+			<if test="sort != null">
+				SORT,
+			</if>
+			<if test="isDelete != null">
+				IS_DELETE,
+			</if>
+			<if test="staffRecordUid != null">
+				STAFFRECORD_UID,
+			</if>
+			<if test="fullName != null">
+				FULL_NAME,
+			</if>
+			<if test="treePath != null">
+				TREE_PATH,
+			</if>
+			<if test="createUser != null">
+				CREATE_USER,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updateUser != null">
+				UPDATE_USER,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="uid != null">
+				#{uid,jdbcType=VARCHAR},
+			</if>
+			<if test="companyUid != null">
+				#{companyUid,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="deptCode != null">
+				#{deptCode,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				#{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=INTEGER},
+			</if>
+			<if test="sort != null">
+				#{sort,jdbcType=INTEGER},
+			</if>
+			<if test="isDelete != null">
+				#{isDelete,jdbcType=INTEGER},
+			</if>
+			<if test="staffRecordUid != null">
+				#{staffRecordUid,jdbcType=VARCHAR},
+			</if>
+			<if test="fullName != null">
+				#{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="treePath != null">
+				#{treePath,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null">
+				#{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateUser != null">
+				#{updateUser,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=BIGINT},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.hisalari.model.comapny.Dept">
+		update DEPT
+		<set>
+			<if test="companyUid != null">
+				COMPANY_UID = #{companyUid,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="deptCode != null">
+				DEPT_CODE = #{deptCode,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				PARENT_ID = #{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				LEVEL = #{level,jdbcType=INTEGER},
+			</if>
+			<if test="sort != null">
+				SORT = #{sort,jdbcType=INTEGER},
+			</if>
+			<if test="isDelete != null">
+				IS_DELETE = #{isDelete,jdbcType=INTEGER},
+			</if>
+			<if test="staffRecordUid != null">
+				STAFFRECORD_UID = #{staffRecordUid,jdbcType=VARCHAR},
+			</if>
+			<if test="fullName != null">
+				FULL_NAME = #{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="treePath != null">
+				TREE_PATH = #{treePath,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null">
+				CREATE_USER = #{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME = #{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateUser != null">
+				UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+		</set>
+		where UID = #{uid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.hisalari.model.comapny.Dept">
+		update DEPT
+		set
+		COMPANY_UID = #{companyUid,jdbcType=VARCHAR},
+		NAME =
+		#{name,jdbcType=VARCHAR},
+		DEPT_CODE = #{deptCode,jdbcType=VARCHAR},
+		PARENT_ID = #{parentId,jdbcType=VARCHAR},
+		LEVEL =
+		#{level,jdbcType=INTEGER},
+		SORT = #{sort,jdbcType=INTEGER},
+		IS_DELETE =
+		#{isDelete,jdbcType=INTEGER},
+		STAFFRECORD_UID =
+		#{staffRecordUid,jdbcType=VARCHAR},
+		FULL_NAME =
+		#{fullName,jdbcType=VARCHAR},
+		TREE_PATH = #{treePath,jdbcType=VARCHAR},
+		CREATE_USER = #{createUser,jdbcType=VARCHAR},
+		CREATE_TIME =
+		#{createTime,jdbcType=BIGINT},
+		UPDATE_USER =
+		#{updateUser,jdbcType=VARCHAR},
+		UPDATE_TIME =
+		#{updateTime,jdbcType=BIGINT}
+		where UID = #{uid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByCompanyName" parameterType="com.hisalari.model.comapny.Dept">
+		update DEPT
+		set
+		NAME = #{name,jdbcType=VARCHAR}
+		where COMPANY_UID =
+		#{companyUid,jdbcType=VARCHAR}
+		and PARENT_ID = '0'
+	</update>
+
+	<insert id="insertOrUpdate" parameterType="com.hisalari.model.comapny.Dept">
+		insert into DEPT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="uid != null">
+				UID,
+			</if>
+			<if test="companyUid != null">
+				COMPANY_UID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="deptCode != null">
+				DEPT_CODE,
+			</if>
+			<if test="parentId != null">
+				PARENT_ID,
+			</if>
+			<if test="level != null">
+				LEVEL,
+			</if>
+			<if test="sort != null">
+				SORT,
+			</if>
+            <if test="description != null">
+                DESCRIPTION,
+            </if>
+			<if test="isDelete != null">
+				IS_DELETE,
+			</if>
+			<if test="staffRecordUid != null">
+				STAFFRECORD_UID,
+			</if>
+			<if test="fullName != null">
+				FULL_NAME,
+			</if>
+			<if test="treePath != null">
+				TREE_PATH,
+			</if>
+			<if test="createUser != null">
+				CREATE_USER,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updateUser != null">
+				UPDATE_USER,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="uid != null">
+				#{uid,jdbcType=VARCHAR},
+			</if>
+			<if test="companyUid != null">
+				#{companyUid,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="deptCode != null">
+				#{deptCode,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				#{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				#{level,jdbcType=INTEGER},
+			</if>
+			<if test="sort != null">
+				#{sort,jdbcType=INTEGER},
+			</if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+			<if test="isDelete != null">
+				#{isDelete,jdbcType=INTEGER},
+			</if>
+			<if test="staffRecordUid != null">
+				#{staffRecordUid,jdbcType=VARCHAR},
+			</if>
+			<if test="fullName != null">
+				#{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="treePath != null">
+				#{treePath,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null">
+				#{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateUser != null">
+				#{updateUser,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=BIGINT},
+			</if>
+		</trim>
+		on duplicate key update
+		<trim suffixOverrides=",">
+			<if test="companyUid != null">
+				COMPANY_UID = #{companyUid,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="deptCode != null">
+				DEPT_CODE = #{deptCode,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				PARENT_ID = #{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="level != null">
+				LEVEL = #{level,jdbcType=INTEGER},
+			</if>
+			<if test="sort != null">
+				SORT = #{sort,jdbcType=INTEGER},
+			</if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+			<if test="isDelete != null">
+				IS_DELETE = #{isDelete,jdbcType=INTEGER},
+			</if>
+			<if test="staffRecordUid != null">
+				STAFFRECORD_UID = #{staffRecordUid,jdbcType=VARCHAR},
+			</if>
+			<if test="fullName != null">
+				FULL_NAME = #{fullName,jdbcType=VARCHAR},
+			</if>
+			<if test="treePath != null">
+				TREE_PATH = #{treePath,jdbcType=VARCHAR},
+			</if>
+			<if test="createUser != null">
+				CREATE_USER = #{createUser,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME = #{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateUser != null">
+				UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+		</trim>
+	</insert>
+	<insert id="batchInsert" parameterType="java.util.List">
+		insert into DEPT (UID,
+		COMPANY_UID, NAME,
+		DEPT_CODE, PARENT_ID, LEVEL,
+		IS_DELETE, SORT,DESCRIPTION,FULL_NAME,TREE_PATH) values
+		<foreach item="item" index="index" collection="list" open=""
+			separator="," close="">
+			(#{item.uid,jdbcType=VARCHAR},
+			#{item.companyUid,jdbcType=VARCHAR},
+			#{item.name,jdbcType=VARCHAR},
+			#{item.deptCode,jdbcType=VARCHAR},
+			#{item.parentId,jdbcType=VARCHAR},
+			#{item.level,jdbcType=INTEGER},
+			#{item.isDelete,jdbcType=INTEGER},
+			#{item.sort,jdbcType=INTEGER},
+			#{item.description,jdbcType=VARCHAR},
+			#{item.fullName,jdbcType=VARCHAR},
+			#{item.treePath,jdbcType=VARCHAR}
+			)
+		</foreach>
+	</insert>
+
+	<update id="batchUpdate" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			update DEPT
+			<set>
+				<if test="item.companyUid != null">
+					COMPANY_UID = #{item.companyUid,jdbcType=VARCHAR},
+				</if>
+				<if test="item.name != null">
+					NAME = #{item.name,jdbcType=VARCHAR},
+				</if>
+				<if test="item.deptCode != null">
+					DEPT_CODE = #{item.deptCode,jdbcType=VARCHAR},
+				</if>
+				<if test="item.parentId != null">
+					PARENT_ID = #{item.parentId,jdbcType=VARCHAR},
+				</if>
+				<if test="item.level != null">
+					LEVEL = #{item.level,jdbcType=INTEGER},
+				</if>
+				<if test="item.sort != null">
+					SORT = #{item.sort,jdbcType=INTEGER},
+				</if>
+				<if test="item.isDelete != null">
+					IS_DELETE = #{item.isDelete,jdbcType=INTEGER},
+				</if>
+				<if test="item.description != null">
+					DESCRIPTION = #{item.description,jdbcType=VARCHAR},
+				</if>
+				<if test="item.staffRecordUid != null">
+					STAFFRECORD_UID = #{item.staffRecordUid,jdbcType=VARCHAR},
+				</if>
+				<if test="item.fullName != null">
+					FULL_NAME = #{item.fullName,jdbcType=VARCHAR},
+				</if>
+				<if test="item.treePath != null">
+					TREE_PATH = #{item.treePath,jdbcType=VARCHAR},
+				</if>
+				<if test="item.createUser != null">
+					CREATE_USER = #{itemcreateUser,jdbcType=VARCHAR},
+				</if>
+				<if test="item.createTime != null">
+					CREATE_TIME = #{item.createTime,jdbcType=BIGINT},
+				</if>
+				<if test="item.updateUser != null">
+					UPDATE_USER = #{item.updateUser,jdbcType=VARCHAR},
+				</if>
+				<if test="item.updateTime != null">
+					UPDATE_TIME = #{item.updateTime,jdbcType=BIGINT},
+				</if>
+			</set>
+			where UID = #{item.uid,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+
+	<select id="totalStaff" parameterType="java.util.List"
+		resultType="java.util.Map">
+        SELECT a.NAME, a.TYPE,
+        CASE WHEN b.count IS NULL THEN 0 ELSE b.count END VALUE
+        FROM
+        (
+        SELECT
+        '正式员工' AS NAME,1 AS TYPE FROM DUAL
+        UNION ALL
+        SELECT
+        '试用期' AS NAME, 0 AS TYPE FROM DUAL
+        UNION ALL
+        SELECT
+        '实习生' AS NAME, 3 AS TYPE FROM DUAL
+        UNION ALL
+        SELECT
+        '兼职' AS NAME, 5 AS TYPE FROM DUAL
+        UNION ALL
+        SELECT
+        '返聘' AS NAME, 4 AS TYPE FROM DUAL
+        ) AS a
+        LEFT JOIN (
+        SELECT
+        COUNT(1) count,
+        a.STAFF_STATUS
+        FROM
+        STAFF_COMMON a
+		LEFT JOIN STAFF_MAIN b ON a.STAFF_RECORD_UID = b.STAFF_RECORD_UID
+        WHERE
+        b.IS_LEAVE = FALSE
+        AND FROM_UNIXTIME(
+        a.DATE_OF_ENTRY / 1000,
+        '%Y-%m-%d'
+        ) <![CDATA[<=]]> NOW()
+        AND a.DEPT_UID IN
+        <foreach item="deptid" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{deptid}
+        </foreach>
+        GROUP BY
+        a.STAFF_STATUS
+        ) b ON b.STAFF_STATUS = a.TYPE
+	</select>
+	<select id="queryStaffByName" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+        SELECT
+        a.STAFF_RECORD_UID AS STAFF_UID,
+        a.JOB_NUMBER AS JOB_NUMBER,
+        a.NAME AS NAME
+        FROM
+        STAFF_COMMON a 
+		LEFT JOIN STAFF_MAIN b ON a.STAFF_RECORD_UID = b.STAFF_RECORD_UID
+        WHERE
+        a.NAME like
+        CONCAT('%', #{staffName}, '%')
+        and b.COMPANY_UID = #{companyUid}
+        and b.STATUS = 1
+        and a.STAFF_STATUS in (0,1,3,4,5)
+        AND a.DEPT_UID IN
+        <foreach item="item" index="index" collection="ids" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	<select id="queryDeptByName" parameterType="java.util.Map"
+		resultType="java.util.HashMap">
+		SELECT
+		UID AS DEPT_UID,
+		`NAME` AS DEPT_NAME
+		FROM
+		DEPT
+		WHERE
+		NAME
+		like
+		CONCAT('%',
+		#{deptName}, '%')
+		and COMPANY_UID = #{companyUid} and
+		IS_DELETE = 0 AND UID IN
+		<foreach item="item" index="index" collection="ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="getParentInfo" parameterType="java.lang.String" resultType="map">
+		SELECT UID, NAME,LEVEL, from DEPT WHERE FIND_IN_SET(UID,queryParentDeptInfo(#{deptUid})) AND <![CDATA[ PARENT_ID <> '0' ]]> ORDER BY FIND_IN_SET(UID,queryParentDeptInfo(#{deptUid})) DESC;
+	</select>
+	
+	<select id="queryFullName" parameterType="java.lang.String" resultType="map">
+        SELECT
+          b.FULL_NAME
+        FROM
+          STAFF_COMMON a
+        LEFT JOIN DEPT b ON b.UID = a.DEPT_UID
+		LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+        WHERE
+         a.MOBILE = #{phone}
+        AND c.STATUS = 1
+        AND c.IS_LEAVE = FALSE
+        AND a.STAFF_STATUS IN (0, 1, 3, 4, 5)
+	</select>
+	
+	 <select id="selectReportJobNumber" parameterType="com.hisalari.model.criteria.StaffCriteria" resultType="map">
+         SELECT
+         a.STAFF_UID AS uid,
+         a.STAFF_RECORD_UID AS recordUid,
+         a. NAME AS name,
+         a.JOB_NUMBER AS jobNumber,
+         b. NAME AS deptName
+         FROM 
+       	STAFF_COMMON a
+		LEFT JOIN DEPT b ON a.DEPT_UID = b.UID 
+		LEFT JOIN STAFF_MAIN c ON a.STAFF_RECORD_UID = c.STAFF_RECORD_UID
+         WHERE
+         c.STATUS = 1
+         AND c.IS_LEAVE = FALSE
+         AND a.STAFF_STATUS IN (0, 1, 3, 4, 5)
+         AND b.COMPANY_UID = #{companyUid,jdbcType=VARCHAR}
+	<if test="recordUid != null">
+		and a.STAFF_RECORD_UID != #{recordUid,jdbcType=VARCHAR}
+	</if>
+	<if test="deptUids != null and deptUids.size()>0">
+		and b.UID in <foreach collection="deptUids" item="deptUid" index="index"
+		open="(" separator="," close=")">#{deptUid}</foreach>
+	</if>
+	<if test="key != null">
+		and (a.`NAME` like '%${key}%' or a.JOB_NUMBER like '%${key}%' or b.`NAME` like '%${key}%')
+	</if>
+	<if test="podoProvinces != null and podoProvinces.size()>0">
+		and a.PROVINCE in <foreach collection="podoProvinces" item="podoProvince" index="index"
+		open="(" separator="," close=")">#{podoProvince}</foreach>
+	</if>
+	<if test="companyUid != null">
+		and a.COMPANY_UID = #{companyUid}
+	</if>
+	<if test="gender != null">
+		and a.GENDER = #{gender}
+	</if>
+	<if test="name != null">
+		and a.NAME = #{name}
+	</if>
+	<if test="mobile != null">
+		and a.MOBILE = #{mobile}
+	</if>
+	<if test="jobNumber != null">
+		and a.JOB_NUMBER = #{jobNumber}
+	</if>
+	<if test="minAge != null">
+		and a.AGE >= #{minAge}
+	</if>
+	<if test="maxAge != null">
+		and a.AGE &lt;= #{maxAge}
+	</if>
+	<if test="staffRecordId != null and staffRecordId.size()>0">
+		and a.STAFF_RECORD_UID not in <foreach collection="staffRecordId" item="staffRecordId" index="index"
+		open="(" separator="," close=")">#{staffRecordId}</foreach>
+	</if>
+	order by a.CREATE_TIME desc
+	limit #{first} ,#{size}
+  </select>
+  
+  <select id="countReportJobNumber" parameterType="com.hisalari.model.criteria.StaffCriteria" resultType="int">
+	SELECT
+      count(1)
+      FROM
+      STAFF_COMMON a 
+	  LEFT JOIN  DEPT b ON  a.DEPT_UID = b.UID
+      LEFT JOIN STAFF_MAIN c ON c.STAFF_RECORD_UID = a.STAFF_RECORD_UID
+      WHERE
+      c.STATUS = 1
+      AND c.IS_LEAVE = FALSE
+      AND a.STAFF_STATUS IN (0, 1, 3, 4, 5)
+      AND b.COMPANY_UID = #{companyUid,jdbcType=VARCHAR}
+	<if test="recordUid != null">
+		and a.STAFF_RECORD_UID != #{recordUid,jdbcType=VARCHAR}
+	</if>
+	<if test="deptUids != null and deptUids.size()>0">
+		and b.UID in <foreach collection="deptUids" item="deptUid" index="index"
+		open="(" separator="," close=")">#{deptUid}</foreach>
+	</if>
+	<if test="key != null">
+		and (a.`NAME` like '%${key}%' or a.JOB_NUMBER like '%${key}%' or b.`NAME` like '%${key}%')
+	</if>
+	<if test="podoProvinces != null and podoProvinces.size()>0">
+		and a.PROVINCE in <foreach collection="podoProvinces" item="podoProvince" index="index"
+		open="(" separator="," close=")">#{podoProvince}</foreach>
+	</if>
+	<if test="companyUid != null">
+		and a.COMPANY_UID = #{companyUid}
+	</if>
+	<if test="gender != null">
+		and a.GENDER = #{gender}
+	</if>
+	<if test="name != null">
+		and a.NAME = #{name}
+	</if>
+	<if test="mobile != null">
+		and a.MOBILE = #{mobile}
+	</if>
+	<if test="jobNumber != null">
+		and a.JOB_NUMBER = #{jobNumber}
+	</if>
+	<if test="minAge != null">
+		and a.AGE >= #{minAge}
+	</if>
+	<if test="maxAge != null">
+		and a.AGE &lt;= #{maxAge}
+	</if>
+	<if test="staffRecordId != null and staffRecordId.size()>0">
+		and a.STAFF_RECORD_UID not in <foreach collection="staffRecordId" item="staffRecordId" index="index"
+		open="(" separator="," close=")">#{staffRecordId}</foreach>
+	</if>
+	order by a.CREATE_TIME desc
+  </select>
+	<select id="queryAllValidDept" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		WHERE COMPANY_UID = #{companyUid} AND IS_DELETE = 0
+	</select>
+	<select id="queryAllDeptCode" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT DEPT_CODE FROM DEPT WHERE COMPANY_UID = #{companyUid} AND IS_DELETE = 0
+	</select>
+	<update id="mergeDepts" parameterType="java.util.Map">
+        UPDATE STAFF_VALUE t1
+        RIGHT JOIN
+        (
+        SELECT
+        t3.UID,t3.STAFF_FIELD_UID FROM STAFF_FIELD_CONFIG t3
+        LEFT JOIN STAFF_FIELD t4
+        ON (t3.STAFF_FIELD_UID = t4.UID AND t4.CNAME = 'DEPT_UID')
+        ) t2
+        ON t1.STAFF_FIELD_CONFIG_UID = t2.UID
+        SET t1.VALUE = #{toDeptUid}
+        WHERE t1.VALUE IN
+        <foreach item="item" index="index" collection="ids" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+	</update>
+	<update id="updateStaffCommon" parameterType="java.util.Map">
+		UPDATE STAFF_COMMON t1
+		SET t1.DEPT_UID = #{toDeptUid}
+		WHERE t1.DEPT_UID IN
+		<foreach item="item" index="index" collection="ids" open="("
+				 separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+    <select id="getSortByParentId" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT SORT FROM DEPT
+		WHERE PARENT_ID = #{parentId} AND IS_DELETE = 0 AND SORT IS NOT NULL ORDER BY SORT DESC
+	</select>
+	<select id="selectTopDept" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		where PARENT_ID = '0' AND IS_DELETE = FALSE
+	</select>
+    <select id="queryDeptByCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from DEPT
+        where DEPT_CODE = #{deptCode} and IS_DELETE = 0
+    </select>
+    <select id="queryParent" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from DEPT
+        where PARENT_ID = '0'
+    </select>
+    <select id="queryChildren" parameterType="java.lang.String"
+            resultMap="CompanyDepetTreeResult">
+      SELECT
+            a.UID,
+            a.NAME,
+            a.PARENT_ID,
+            a.DEPT_CODE,
+            a.COMPANY_UID,
+            a.STAFFRECORD_UID,
+            a.FULL_NAME,
+            a.TREE_PATH,
+            a.DESCRIPTION,
+            a.LEVEL,
+            a.sort
+        FROM
+            DEPT a
+        WHERE
+            a.UID = #{uid,jdbcType=VARCHAR}
+        AND a.IS_DELETE = 0
+
+    </select>
+    <update id="updateDeptReport" parameterType="java.lang.String">
+        UPDATE DEPT SET STAFFRECORD_UID = NULL
+        WHERE STAFFRECORD_UID = #{staffRecordUid}
+    </update>
+	<select id="queryValidCompanyDept" parameterType="java.lang.String"
+            resultMap="CompanyDeptResultMap">
+		 SELECT
+            a.UID,
+            a.NAME,
+            a.PARENT_ID,
+            a.DEPT_CODE,
+            a.COMPANY_UID,
+            a.STAFFRECORD_UID,
+            a.FULL_NAME,
+            a.TREE_PATH,
+            a.DESCRIPTION,
+            a.LEVEL,
+            a.sort,
+            b.JOB_NUMBER,
+            b.NAME AS STAFF_NAME
+        FROM
+            DEPT a
+         LEFT JOIN STAFF_COMMON b ON a.STAFFRECORD_UID = b.STAFF_RECORD_UID
+        WHERE
+            a.COMPANY_UID = #{companyUid,jdbcType=VARCHAR}
+        AND a.IS_DELETE = 0
+	</select>
+	<select id="selectDeptAll" resultMap="BaseResultMap">
+	SELECT * FROM DEPT WHERE IS_DELETE = FALSE
+	</select>
+	<select id="selectDepts" resultType="map">
+		SELECT a.UID, a.`NAME`,a.SORT,a.`LEVEL`
+		FROM DEPT a 
+		WHERE a.IS_DELETE = FALSE
+		ORDER BY a.`LEVEL` ASC ,a.SORT ASC
+	</select>
+	<select id="selectDeptStaffByYearMonth" parameterType="java.lang.String" resultType="map">
+		SELECT
+		a.UID,
+		a.`NAME`,
+		a.COUNT,
+		a.DATE_OF_ENTRY,
+		a.SORT,
+		a.`LEVEL`,
+		a.LEAVE_OFFICE_TIME 
+	FROM
+		(
+			(
+			SELECT
+				c.UID,
+				c.`NAME`,
+				c.COUNT,
+				c.DATE_OF_ENTRY,
+				c.SORT,
+				c.`LEVEL`,
+				c.LEAVE_OFFICE_TIME 
+			FROM
+				(
+				SELECT
+					a.UID,
+					a.`NAME`,
+					COUNT( b.DEPT_UID ) AS COUNT,
+					b.DATE_OF_ENTRY,
+					a.SORT,
+					a.`LEVEL`,
+					b.LEAVE_OFFICE_TIME 
+				FROM
+					DEPT a
+					LEFT JOIN STAFF_INFO b ON a.UID = b.DEPT_UID 
+				WHERE
+					a.IS_DELETE = FALSE 
+					AND b.IS_LEAVE = FALSE 
+				GROUP BY
+					b.DEPT_UID 
+				ORDER BY
+					a.`LEVEL` ASC,
+					a.SORT ASC 
+				) c 
+			WHERE
+				DATE_FORMAT( c.DATE_OF_ENTRY, '%Y-%m' )  &lt;= #{endYearMonth}
+			ORDER BY
+				c.`LEVEL` ASC,
+				c.SORT ASC 
+			) UNION ALL
+			(
+			SELECT
+				c.UID,
+				c.`NAME`,
+				c.COUNT,
+				c.DATE_OF_ENTRY,
+				c.SORT,
+				c.`LEVEL`,
+				c.LEAVE_OFFICE_TIME 
+			FROM
+				(
+				SELECT
+					a.UID,
+					a.`NAME`,
+					COUNT( b.DEPT_UID ) AS COUNT,
+					b.DATE_OF_ENTRY,
+					a.SORT,
+					a.`LEVEL`,
+					b.LEAVE_OFFICE_TIME 
+				FROM
+					DEPT a
+					LEFT JOIN STAFF_INFO b ON a.UID = b.DEPT_UID 
+				WHERE
+					a.IS_DELETE = FALSE 
+					AND b.IS_LEAVE = TRUE 
+				GROUP BY
+					b.DEPT_UID 
+				ORDER BY
+					a.`LEVEL` ASC,
+					a.SORT ASC 
+				) c 
+			WHERE
+				DATE_FORMAT( c.LEAVE_OFFICE_TIME, '%Y-%m' ) > #{endYearMonth}
+			ORDER BY
+				c.`LEVEL` ASC,
+				c.SORT ASC 
+			) 
+		) a 
+	GROUP BY
+		a.UID
+	</select>
+	<select id="selectDeptByParentId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		where PARENT_ID = '0'
+	</select>
+	
+	<select id="selectDeptByNotDelete" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DEPT
+		where IS_DELETE = false
+	</select>
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+	 	insert into DEPT (UID,
+		COMPANY_UID, `NAME`,
+		DEPT_CODE, PARENT_ID, `LEVEL`,
+		SORT, IS_DELETE,
+		STAFFRECORD_UID,
+		FULL_NAME, TREE_PATH, CREATE_USER,
+		CREATE_TIME,
+		UPDATE_USER, UPDATE_TIME
+      )
+    values 
+    <foreach collection="list" item="item" index="index" open=""
+			close="" separator=",">
+	   (#{item.uid,jdbcType=VARCHAR},
+		#{item.companyUid,jdbcType=VARCHAR},
+		#{item.name,jdbcType=VARCHAR},
+		#{item.deptCode,jdbcType=VARCHAR}, 
+		#{item.parentId,jdbcType=VARCHAR},
+		#{item.level,jdbcType=INTEGER},
+		#{item.sort,jdbcType=INTEGER},
+		#{item.isDelete,jdbcType=INTEGER},
+		#{item.staffRecordUid,jdbcType=VARCHAR},
+		#{item.fullName,jdbcType=VARCHAR}, 
+		#{item.treePath,jdbcType=VARCHAR},
+		#{item.createUser,jdbcType=VARCHAR},
+		#{item.createTime,jdbcType=BIGINT},
+		#{item.updateUser,jdbcType=VARCHAR},
+		#{item.updateTime,jdbcType=BIGINT}
+		)
+		</foreach>
+	</insert>
+	
+	<select id="selectCompanyDeptUid" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		 SELECT
+            a.UID
+        FROM
+            DEPT a
+        WHERE
+          a.IS_DELETE = 0
+        AND a.parent_id = '0'
+	</select>
+</mapper>

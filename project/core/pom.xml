@@ -13,9 +13,9 @@
         <redis.version>2.9.1</redis.version>
         <spring-data-redis.version>2.1.4.RELEASE</spring-data-redis.version>
         <mybatis-spring.version>2.0.1</mybatis-spring.version>
-        <atomikos.version>5.0.1</atomikos.version>
+        <atomikos.version>4.0.6</atomikos.version>
         <transaction.version>1.1</transaction.version>
-        <mysql.version>5.1.32</mysql.version>
+
         <druid.version>1.1.18</druid.version>
     </properties>
     <dependencyManagement>
@@ -34,6 +34,11 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis-spring</artifactId>
                 <version>${mybatis-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/javax.transaction/jta -->
             <dependency>
@@ -67,11 +72,7 @@
                 <artifactId>transactions-jdbc</artifactId>
                 <version>${atomikos.version}</version>
             </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
@@ -107,7 +108,7 @@
             <artifactId>mybatis-spring</artifactId>
         </dependency>
         <!-- 事务 -->
-        <dependency>
+       <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
         </dependency>
