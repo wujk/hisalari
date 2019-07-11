@@ -76,10 +76,10 @@ public class MybatisConfiguration implements ApplicationContextAware {
         Resource[] resources = resourcePatternResolver.getResources("classpath*:mapper/*/*.xml");
         sqlSessionFactoryBean.setMapperLocations(resources);
 
-        /*if (isProdEnv()) {
-            Resource resource = resourcePatternResolver.getResource("mybatis-config.xml");
+        if (!isProdEnv()) {
+            Resource resource = resourcePatternResolver.getResource("classpath:mybatis-config.xml");
             sqlSessionFactoryBean.setConfigLocation(resource);
-        }*/
+        }
         sqlSessionFactoryBean.setTypeHandlersPackage("com.hisalari.dao.*.*");
         return sqlSessionFactoryBean.getObject();
     }

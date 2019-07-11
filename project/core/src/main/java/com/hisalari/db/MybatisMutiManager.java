@@ -50,10 +50,10 @@ public class MybatisMutiManager extends DataBaseManager<SqlSessionFactory, SqlSe
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = resourcePatternResolver.getResources("classpath*:mapper/*/*.xml");
         factoryBean.setMapperLocations(resources);
-        /*if (!springContextUtils.isProdEnv()) {
-            Resource resource = resourcePatternResolver.getResource("mybatis-config.xml");
+        if (!springContextUtils.isProdEnv()) {
+            Resource resource = resourcePatternResolver.getResource("classpath:mybatis-config.xml");
             factoryBean.setConfigLocation(resource);
-        }*/
+        }
         factoryBean.setTypeHandlersPackage("com.hisalari.dao.*.*");
         factoryBean.setDataSource(dataSource);
         if (interceptors.size() > 0) {
