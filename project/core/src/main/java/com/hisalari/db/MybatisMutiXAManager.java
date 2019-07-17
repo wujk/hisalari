@@ -1,5 +1,6 @@
 package com.hisalari.db;
 
+import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.hisalari.dao.datasource.DatasourceConfigMapper;
 import com.hisalari.db.interfaces.DataBaseManager;
@@ -63,7 +64,9 @@ public class MybatisMutiXAManager extends MybatisMutiManager {
 
     @Override
     public DataSource createDataSource(DataBase dataBase) throws SQLException {
-        return createAtomikosDataSourceBean((XADataSource)super.createDataSource(dataBase));
+        DruidXADataSource druidXADataSource = (DruidXADataSource)super.createDataSource(dataBase);
+        druidXADataSource.setRemoveAbandoned(false);
+        return createAtomikosDataSourceBean(druidXADataSource);
     }
 
     public AtomikosDataSourceBean createAtomikosDataSourceBean(XADataSource xaDataSource) {

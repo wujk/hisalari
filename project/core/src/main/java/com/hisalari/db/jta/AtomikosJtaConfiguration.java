@@ -1,6 +1,5 @@
 package com.hisalari.db.jta;
 
-import com.atomikos.icatch.jta.JtaTransactionServicePlugin;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.hisalari.properties.PropertiesConfiguration;
