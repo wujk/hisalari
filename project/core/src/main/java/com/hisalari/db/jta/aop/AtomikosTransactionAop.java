@@ -1,6 +1,8 @@
 package com.hisalari.db.jta.aop;
 
 import com.hisalari.db.MybatisMutiXAManager;
+import com.hisalari.db.Transactional;
+import com.hisalari.db.dbAop;
 import com.hisalari.db.interfaces.Session;
 import com.hisalari.db.jta.AtomikosEnable;
 import com.hisalari.spring.SpringContextUtils;
@@ -26,7 +28,7 @@ import java.util.Set;
 
 @Component
 @Aspect
-public class AtomikosTransactionAop {
+public class AtomikosTransactionAop extends dbAop {
     private Logger logger = LoggerFactory.getLogger(AtomikosTransactionAop.class);
 
     @Resource(name = "atomikosJta")
@@ -38,34 +40,31 @@ public class AtomikosTransactionAop {
     @Autowired
     MybatisMutiXAManager mybatisMutiXAManager;
 
+    @Autowired
+    private Transactional transactional;
+
     @Pointcut("@annotation(com.hisalari.db.jta.AtomikosEnable)")
     private void transactional() {
     }
 
     @Around("transactional()")
     public Object beforeInsertMethods(ProceedingJoinPoint pjp) throws Exception {
-        AtomikosEnable atomikosEnable = ((MethodSignature)pjp.getSignature()).getMethod().getAnnotation(AtomikosEnable.class);
-        String transactionManagerName = atomikosEnable.transactionManagerName();
-        logger.info("transactionManagerName：" + transactionManagerName);
-        if (!"atomikosJta".equals(transactionManagerName)) {
-            platformTransactionManager = (PlatformTransactionManager)springContextUtils.getBeanById(transactionManagerName);
-            if (platformTransactionManager == null) {
-                throw new RuntimeException(transactionManagerName + "事务管理器不存在");
-            }
-        }
-        Object obj = null;
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
-        TransactionStatus ts = platformTransactionManager.getTransaction(def);
         Map<String, SqlSession> sessions = null;
+        Object obj = null;
         try {
-            obj = pjp.proceed();
-            platformTransactionManager.commit(ts);
+            AtomikosEnable atomikosEnable = ((MethodSignature)pjp.getSignature()).getMethod().getAnnotation(AtomikosEnable.class);
+            String transactionManagerName = atomikosEnable.transactionManagerName();
+            logger.info("transactionManagerName：" + transactionManagerName);
+            if (!"atomikosJta".equals(transactionManagerName)) {
+                platformTransactionManager = (PlatformTransactionManager)springContextUtils.getBeanById(transactionManagerName);
+                if (platformTransactionManager == null) {
+                    throw new RuntimeException(transactionManagerName + "事务管理器不存在");
+                }
+            }
+            obj = invoke(pjp, transactional, platformTransactionManager);
             sessions = mybatisMutiXAManager.getSessionMap().get();
-        } catch (Throwable e) {
-            platformTransactionManager.rollback(ts);
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new Exception(e);
         } finally {
             if (sessions != null) {
                 Set<Map.Entry<String, SqlSession>> entries = sessions.entrySet();
