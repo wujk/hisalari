@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 
-@SpringBootApplication(scanBasePackages = {"com.hisalari.resource", "com.hisalari.properties", "com.hisalari.redis"}, exclude = {XADataSourceAutoConfiguration.class, DataSourceAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = {"com.hisalari.resource", "com.hisalari.properties", "com.hisalari.redis", "com.hisalari.db.distributed.aop.group"}, exclude = {XADataSourceAutoConfiguration.class, DataSourceAutoConfiguration.class})
 @EnableDubbo
 public class ClientApplication {
 	public static void main(String[] args) {

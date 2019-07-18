@@ -25,7 +25,6 @@ import java.util.UUID;
 /**
  * mybatais多数据源
  */
-@Component
 public class MybatisMutiXAManager extends MybatisMutiManager {
     private Logger logger = LoggerFactory.getLogger(DataBaseManager.class);
 
@@ -72,6 +71,8 @@ public class MybatisMutiXAManager extends MybatisMutiManager {
     public AtomikosDataSourceBean createAtomikosDataSourceBean(XADataSource xaDataSource) {
         AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
         atomikosDataSourceBean.setXaDataSource(xaDataSource);
+        atomikosDataSourceBean.setBorrowConnectionTimeout(60);
+        atomikosDataSourceBean.setMaxPoolSize(20);
         atomikosDataSourceBean.setUniqueResourceName(UUID.randomUUID().toString());
         return atomikosDataSourceBean;
     }

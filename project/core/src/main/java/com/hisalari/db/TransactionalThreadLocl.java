@@ -6,7 +6,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 @Component
-public class Transactional {
+public class TransactionalThreadLocl {
 
     private ThreadLocal<DefaultTransactionDefinition> d = new ThreadLocal<DefaultTransactionDefinition>();
 

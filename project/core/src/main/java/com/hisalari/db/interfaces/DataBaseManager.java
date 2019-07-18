@@ -1,7 +1,6 @@
 package com.hisalari.db.interfaces;
 
 import com.hisalari.db.DataBase;
-import com.hisalari.db.jta.AtomikosEnable;
 import com.hisalari.util.cache.LruCache;
 import com.hisalari.util.date.DateUtil;
 import com.hisalari.util.obj.ObjectUtil;

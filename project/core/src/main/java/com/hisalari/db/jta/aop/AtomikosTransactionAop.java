@@ -1,9 +1,8 @@
 package com.hisalari.db.jta.aop;
 
 import com.hisalari.db.MybatisMutiXAManager;
-import com.hisalari.db.Transactional;
+import com.hisalari.db.TransactionalThreadLocl;
 import com.hisalari.db.dbAop;
-import com.hisalari.db.interfaces.Session;
 import com.hisalari.db.jta.AtomikosEnable;
 import com.hisalari.spring.SpringContextUtils;
 import org.apache.ibatis.session.SqlSession;
@@ -17,10 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.jta.JtaTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -37,11 +32,11 @@ public class AtomikosTransactionAop extends dbAop {
     @Resource(name = "springContextUtils")
     private SpringContextUtils springContextUtils;
 
-    @Autowired
+    @Autowired(required = false)
     MybatisMutiXAManager mybatisMutiXAManager;
 
     @Autowired
-    private Transactional transactional;
+    private TransactionalThreadLocl transactional;
 
     @Pointcut("@annotation(com.hisalari.db.jta.AtomikosEnable)")
     private void transactional() {

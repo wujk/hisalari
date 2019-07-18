@@ -6,4 +6,7 @@ public interface IAccountService {
 
     public String insert();
 
+    public void distributed1(String groupId);
+
+    public void distributed2(String groupId);
 }

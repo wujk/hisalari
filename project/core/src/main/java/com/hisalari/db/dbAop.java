@@ -5,7 +5,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 public class dbAop {
 
-    protected Object invoke(ProceedingJoinPoint pjp, Transactional transactional, PlatformTransactionManager platformTransactionManager) {
+    protected Object invoke(ProceedingJoinPoint pjp, TransactionalThreadLocl transactional, PlatformTransactionManager platformTransactionManager) {
         Object obj = null;
         try {
             transactional.createTransactional(platformTransactionManager);

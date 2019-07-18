@@ -1,8 +1,10 @@
 package com.hisalari.db;
 
 import com.alibaba.druid.pool.xa.DruidXADataSource;
+import com.hisalari.dao.datasource.DatasourceConfigMapper;
 import com.hisalari.db.interfaces.DataBaseManager;
 import com.hisalari.db.interfaces.MapperInterface;
+import com.hisalari.model.datasource.DatasourceConfig;
 import com.hisalari.spring.SpringContextUtils;
 import com.hisalari.util.obj.ObjectUtil;
 import org.apache.ibatis.plugin.Interceptor;
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +29,7 @@ import java.util.List;
 /**
  * mybatais多数据源
  */
+@Component
 public class MybatisMutiManager extends DataBaseManager<SqlSessionFactory, SqlSession> implements MapperInterface {
     private Logger logger = LoggerFactory.getLogger(DataBaseManager.class);
 
@@ -34,9 +39,35 @@ public class MybatisMutiManager extends DataBaseManager<SqlSessionFactory, SqlSe
     @Autowired
     protected SpringContextUtils springContextUtils;
 
+    @PostConstruct
+    public void loadAllDB() {
+        storageDatasource();
+    }
+
     @Override
     public List<DataBase> findDatabase() {
-        return null;
+        List<DataBase> dataBases = new ArrayList<>();
+        SqlSession session = null;
+        try{
+            DatasourceConfigMapper datasourceConfigMapper = getMapper(DatasourceConfigMapper.class, MybatisMutiXAManager.BASE_DB_ID);
+            List<DatasourceConfig> datasourceConfigs = datasourceConfigMapper.selectDatasourceConfigs();
+            for (DatasourceConfig datasourceConfig: datasourceConfigs) {
+                DataBase dataBase = new DataBase();
+                dataBase.setDataBaseId(datasourceConfig.getUid());
+                dataBase.setUrl(datasourceConfig.getUrl());
+                dataBase.setUserName(datasourceConfig.getUsername());
+                dataBase.setPassword(datasourceConfig.getPassword());
+                dataBases.add(dataBase);
+            }
+            session = getCurrentSqlSession(MybatisMutiXAManager.BASE_DB_ID);
+            session.commit();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            session.rollback();
+        } finally {
+            session.close();
+            return dataBases;
+        }
     }
 
     @Override

@@ -64,6 +64,8 @@ public class MybatisConfiguration implements ApplicationContextAware {
     public AtomikosDataSourceBean atomikosDataSourceBean(@Autowired @Qualifier("druidXADataSource") DruidXADataSource druidXADataSource) throws SQLException {
         AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
         atomikosDataSourceBean.setXaDataSource(druidXADataSource);
+        atomikosDataSourceBean.setBorrowConnectionTimeout(60);
+        atomikosDataSourceBean.setMaxPoolSize(20);
         atomikosDataSourceBean.setUniqueResourceName(UUID.randomUUID().toString());
         return atomikosDataSourceBean;
     }
