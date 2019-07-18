@@ -52,6 +52,8 @@ public class ZookeeperTx {
                     if (event.getState() == Watcher.Event.KeeperState.SyncConnected) {
                         logger.info("ZookeeperTx连接成功");
                         lantch.countDown();
+                    } else if (event.getState() == Watcher.Event.KeeperState.Disconnected) {
+                        return;
                     }
                     if (event.getType() == Watcher.Event.EventType.NodeDataChanged) {
                         String nodeData = getNodeData();

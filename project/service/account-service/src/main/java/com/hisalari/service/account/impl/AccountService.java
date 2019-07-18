@@ -55,6 +55,7 @@ public class AccountService implements IAccountService {
         dept1.setUid(UUID.randomUUID().toString());
         dept1.setCompanyUid("333");
         dept1.setName("333");
+        //int i = 1/ 0;
         deptMapper1.insert(dept1);
         DeptMapper deptMapper2 = mybatisMutiManager.getMapper(DeptMapper.class, "c87c627e5f39406a8c188c5a5281b5a1");
         Dept dept2 = new Dept();
@@ -62,7 +63,7 @@ public class AccountService implements IAccountService {
         dept2.setCompanyUid("444");
         dept2.setName("444");
         deptMapper2.insert(dept2);
-        int i = 0;
+
     }
 
     @Override
@@ -73,8 +74,8 @@ public class AccountService implements IAccountService {
         dept1.setUid(UUID.randomUUID().toString());
         dept1.setCompanyUid("555");
         dept1.setName("555");
-        int i = 1/0;
         deptMapper1.insert(dept1);
+        //int i = 1/ 0;
         DeptMapper deptMapper2 = mybatisMutiManager.getMapper(DeptMapper.class, "c87c627e5f39406a8c188c5a5281b5a1");
         Dept dept2 = new Dept();
         dept2.setUid(UUID.randomUUID().toString());
