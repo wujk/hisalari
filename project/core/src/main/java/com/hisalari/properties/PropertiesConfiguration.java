@@ -81,7 +81,7 @@ public class PropertiesConfiguration {
     }
 
     private Properties getProperties(String location) throws Exception {
-        PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
+        PropertiesFactoryBean propertiesFactoryBean = new PropertiesHelper();
         List<Resource> list = common();
         Resource[] _resources = resourcePatternResolver.getResources(location);
         list.addAll(Arrays.asList(_resources));

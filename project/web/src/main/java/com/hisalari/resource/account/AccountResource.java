@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 public class AccountResource {
 
@@ -26,10 +29,13 @@ public class AccountResource {
 
     @RequestMapping(value = "/distributed", method = RequestMethod.GET)
     @DistributedEnable
-    public String distributed(String groupId) {
-        accountService.distributed1(groupId);
-        accountService.distributed2(groupId);
-        return "success";
+    public Map<String, String> distributed(String groupId) {
+        Map<String, String> result = new HashMap<>();
+        String str1 = accountService.distributed1(groupId);
+        String str2 =  accountService.distributed2(groupId);
+        result.put(str1,str1);
+        result.put(str2,str2);
+        return result;
     }
 
 }

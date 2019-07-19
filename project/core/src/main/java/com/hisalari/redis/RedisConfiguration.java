@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -18,11 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * redis操作工具包
@@ -115,62 +109,6 @@ public class RedisConfiguration {
 		jedisPoolConfig.setTestOnBorrow(testOnBorrow);
 		jedisPoolConfig.setMaxTotal(maxTotal);
 		return jedisPoolConfig;
-	}
-
-	public int getMaxIdle() {
-		return maxIdle;
-	}
-
-	public void setMaxIdle(int maxIdle) {
-		this.maxIdle = maxIdle;
-	}
-
-	public long getMaxWaitMillis() {
-		return maxWaitMillis;
-	}
-
-	public void setMaxWaitMillis(long maxWaitMillis) {
-		this.maxWaitMillis = maxWaitMillis;
-	}
-
-	public boolean isTestOnBorrow() {
-		return testOnBorrow;
-	}
-
-	public void setTestOnBorrow(boolean testOnBorrow) {
-		this.testOnBorrow = testOnBorrow;
-	}
-
-	public String getHostName() {
-		return hostName;
-	}
-
-	public void setHostName(String hostName) {
-		this.hostName = hostName;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
-	public int getMaxTotal() {
-		return maxTotal;
-	}
-
-	public void setMaxTotal(int maxTotal) {
-		this.maxTotal = maxTotal;
 	}
 
 }

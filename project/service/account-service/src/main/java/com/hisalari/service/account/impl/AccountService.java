@@ -6,12 +6,10 @@ import com.hisalari.dao.company.DeptMapper;
 import com.hisalari.db.MybatisMutiManager;
 import com.hisalari.db.MybatisMutiXAManager;
 import com.hisalari.db.distributed.DistributedClientEnable;
-import com.hisalari.db.distributed.DistributedEnable;
 import com.hisalari.db.jta.AtomikosEnable;
 import com.hisalari.model.comapny.Dept;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -49,7 +47,7 @@ public class AccountService implements IAccountService {
 
     @Override
     @DistributedClientEnable
-    public void distributed1(String groupId) {
+    public String distributed1(String groupId) {
         DeptMapper deptMapper1 = mybatisMutiManager.getMapper(DeptMapper.class, "3be0fdd6b45f4d08858bc78ae853bd1d");
         Dept dept1 = new Dept();
         dept1.setUid(UUID.randomUUID().toString());
@@ -63,12 +61,12 @@ public class AccountService implements IAccountService {
         dept2.setCompanyUid("444");
         dept2.setName("444");
         deptMapper2.insert(dept2);
-
+        return "distributed1";
     }
 
     @Override
     @DistributedClientEnable
-    public void distributed2(String groupId) {
+    public String distributed2(String groupId) {
         DeptMapper deptMapper1 = mybatisMutiManager.getMapper(DeptMapper.class, "3be0fdd6b45f4d08858bc78ae853bd1d");
         Dept dept1 = new Dept();
         dept1.setUid(UUID.randomUUID().toString());
@@ -82,6 +80,7 @@ public class AccountService implements IAccountService {
         dept2.setCompanyUid("666");
         dept2.setName("666");
         deptMapper2.insert(dept2);
+        return "distributed2";
     }
 
 }
