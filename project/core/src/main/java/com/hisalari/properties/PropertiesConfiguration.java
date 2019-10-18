@@ -81,7 +81,7 @@ public class PropertiesConfiguration {
     }
 
     private Properties getProperties(String location) throws Exception {
-        PropertiesFactoryBean propertiesFactoryBean = new PropertiesHelper();
+        PropertiesFactoryBean propertiesFactoryBean = propertiesHelper();
         List<Resource> list = common();
         Resource[] _resources = resourcePatternResolver.getResources(location);
         list.addAll(Arrays.asList(_resources));
@@ -91,6 +91,11 @@ public class PropertiesConfiguration {
         propertiesFactoryBean.afterPropertiesSet();
         Properties properties = propertiesFactoryBean.getObject();
         return properties;
+    }
+
+    @Bean
+    public PropertiesHelper propertiesHelper() {
+        return new PropertiesHelper();
     }
 
 }

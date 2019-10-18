@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-@Component
 public class PropertiesHelper extends org.springframework.beans.factory.config.PropertiesFactoryBean implements ApplicationContextAware{
 
     private ApplicationContext applicationContext;
